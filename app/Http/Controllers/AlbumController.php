@@ -20,9 +20,8 @@ class AlbumController extends Controller
     private $status = 200;
 
     public function index(){
-        $pesquisa_nome = request("nome");
-        $limite = request("limite");
-        $limite = empty($limite) ? 6 : $limite;
+        $pesquisa_nome = request("nome", "");
+        $limite = request("limite", 6);
 
         $query = Album::select('albuns.id', 'albuns.nome', 'albuns.ano', 'albuns.imagem', 'albuns.spotify_link')
             ->selectRaw('COUNT(faixas.id) as quantidade_faixas')
@@ -171,14 +170,15 @@ class AlbumController extends Controller
         
         $valid = $request->validate([
             'token' => 'required|string',
-            'limit' => 'required|max:50|integer',
-            'offset' => 'required|integer',
-            'artist' => 'required|string',
+            'limit' => 'nullable|max:50|integer',
+            'offset' => 'nullable|integer',
+            'artist' => 'nullable|string',
         ]);
+
         $url_albuns = "https://api.spotify.com/v1/artists/"
-            .$valid['artist']."/albums?include_groups=album&offset="
-            .$valid['offset']."&limit="
-            .$valid['limit']."&market=BR&locale=pt-BR";
+            .request('artist', '2PLF4pjm6A5eztTVbt9ou4')."/albums?include_groups=album&offset="
+            .request('offset', '1')."&limit="
+            .request('limit', '30')."&market=BR&locale=pt-BR";
         $curl = curl_init($url_albuns);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HTTPHEADER, array( 'Authorization: Bearer ' . $valid['token']));

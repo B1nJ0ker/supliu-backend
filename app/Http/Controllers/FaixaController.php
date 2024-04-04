@@ -17,9 +17,8 @@ class FaixaController extends Controller
     private $status = 200;
 
     public function index(){
-        $pesquisa_nome = request("nome");
-        $limite = request("limite");
-        $limite = empty($limite) ? 6 : $limite;
+        $pesquisa_nome = request("nome", "");
+        $limite = request("limite", 6);
 
         $query = Faixa::select('id','nome','duracao','spotify_link');
 

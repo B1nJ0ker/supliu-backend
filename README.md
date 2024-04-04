@@ -1,66 +1,111 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Desafio Supliu
+## Requisitos
+ * [PHP 8.2+](https://www.php.net/)
+ * [Composer 2.5.5+](https://getcomposer.org/)
+ * [Postgres 13+](https://www.postgresql.org/)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Funcionalidades
 
-## About Laravel
+* ### Endpoints e suas funções
+O backend conta com um total de 17 Endpoints, onde 9 são destinados ao controle de álbuns, 7 ao de faixas e 1 é usado especialmente para popular o banco.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+#### Controle de Álbuns
+1. ```/api/albuns``` (GET): Permite listar todos os álbuns já cadastrados e seus atributos;
+1. ```/api/albuns/simplify``` (GET): Permite listar todos os álbuns já cadastrados de forma simplificada;
+1. ```/api/albuns/{id}``` (GET): Exibe os dados de um álbum especificado pelo ```{id}```;
+1. ```/api/albuns``` (POST): Permite cadastrar um novo Álbum;
+1. ```/api/albuns/{id}``` (PUT): Permite editar um álbum identificado pelo ```{id}```;
+1. ```/api/albuns/{id}``` (DELETE): Remove o álbum especificado pelo ```{id}```;
+1. ```/api/albuns/{id}/faixas```  (GET): Exibe as faixas de um álbum especificado pelo ```{id}```;
+1. ```/api/albuns/{album_id}/faixa/{faixa_id}``` (POST): Atribui a faixa ao álbum, especificados pelos indicadores ```{album_id}``` e ```{faixa_id}```;
+1. ```/api/albuns/{album_id}/faixa/{faixa_id}``` (DELETE): Desvinlcula a faixa do álbum, especificados pelos indicadores ```{album_id}``` e ```{faixa_id}```.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+#### Controle de Faixas
+1. ```/api/faixas``` (GET): Lista todas as faixas já cadastradas;
+1. ```/api/faixas/simplify``` (GET): Permite listar todas as faixas já cadastradas de forma simplificada;
+1. ```/api/faixas/{id}``` (GET): Exibe os dados de uma faixa especificada pelo ```{id}```;
+1. ```/api/faixas``` (POST): Cadastra uma nova faixa especificada pelo ```{id}```;
+1. ```/api/faixas/{id}``` (PUT): Permite editar uma faixa identificada pelo ```{id}```;
+1. ```/api/faixas/{id}``` (DELETE): Remove a faixa especificada pelo ```{id}```;
+1. ```/api/faixas/{id}/albuns``` (GET): Exibe os álbuns em que a faixa especificada pelo ```{id}``` está inclusa;
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+#### Outros
+1. ```/api/carregarDoSpotify``` (GET): Esse endpoint faz uma consulta recursiva à API do spotify e cadastra automaticamente Álbuns e Faixas de determinado artista. O único atributo obrigatório é o ```token``` os demais são por padrão os necessários para o nosso caso.
 
-## Learning Laravel
+    * ```token``` Deve conter seu token bearer da API do Spotify ( Obrigatório );
+    * ```limit``` Total de Álbuns a serem cadastrados (Máx.: 50);
+    * ```offset``` Posição no banco do spotify onde deseja iniciar a consulta;
+    * ```artist``` Id do artista no Spotify;
+    
+Exemplo:
+```
+http://API_URL/api/carregarDoSpotify?token=SEU_TOKEN_SPOTIFY&limit=30
+```
+ 
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+* ### Validação dos dados:
+No backend a validação é feita pelo próprio Laravel tanto durante o cadastro quanto a atualização, retornando um erro ```422``` e descrevendo a inconformidade.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+ ###### Álbum
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. ```nome```: Required|String|Unique|Max:100;
+1. ```ano```: Required|Integer|Digits:4;
+1. ```imagem```: String;
+1. ```spotify_link```: String.
 
-## Laravel Sponsors
+ ###### Faixa
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+1. ```nome```: Required|String|Unique|Max:100;
+1. ```duracao```: Required|Integer; ( Salva em *ms*)
+1. ```spotify_link```: String.
+1. ```albuns```: Required|Array.
 
-### Premium Partners
+A relação entre Álbuns e Faixas é de m:m, entretanto para criar uma faixa deve obrigatoriamente colocá-la num Álbum já existente.
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Instalação
 
-## Contributing
+* ### Banco de dados
+Instalar o Postgres 13 ou superior.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Criar o banco de dados no Postgres: 
+```sql
+CREATE DATABASE nome_do_banco
+```
 
-## Code of Conduct
+* ### PHP
+ Após instalar o php 8.2 ou superior. No arquivo ```php.ini``` descomente as seguintes linhas:
+```
+extension=pdo_pgsql
+extension=zip
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+* ### Composer
+Baixar e instalar o composer ( Lembre-se de apontar para o path correto do php )
 
-## Security Vulnerabilities
+Rode ```composer install``` na pasta do projeto para Instalar todas as dependências 
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Configuração
+* ### Tradução das mensagens de erro
+Renomeio o arquivo ```.env.example``` para ```.env```
 
-## License
+Na linha ```APP_LOCALE=en``` mude para ```APP_LOCALE=pt_BR``` 
+* ### Configurar a conexão com o banco de dados
+Ainda no arquivo ```.env```, no bloco ```DB_CONNECTION``` insira as informações corretas do seu banco de dados.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=nome_do_banco_dedados
+DB_USERNAME=nome_do_usuario_do_banco_de_dados
+DB_PASSWORD=senha_do_banco_de_dados
+```
+* ### Inicializar o banco com ```artisan```
+```
+php artisan migrate
+```
+
+* ### Iniciar servidor
+```
+php artisan serve
+```

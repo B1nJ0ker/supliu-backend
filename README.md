@@ -32,7 +32,7 @@ O backend conta com um total de 17 Endpoints, onde 9 são destinados ao controle
 #### Outros
 1. ```/api/carregarDoSpotify``` (GET): Esse endpoint faz uma consulta recursiva à API do spotify e cadastra automaticamente Álbuns e Faixas de determinado artista. O único atributo obrigatório é o ```token``` os demais são por padrão os necessários para o nosso caso.
 
-    * ```token``` Deve conter seu token bearer da API do Spotify ( Obrigatório );
+    * ```token``` Deve conter seu [token da API do Spotify](https://developer.spotify.com/documentation/web-api/tutorials/getting-started) ( Obrigatório );
     * ```limit``` Total de Álbuns a serem cadastrados (Máx.: 50);
     * ```offset``` Posição no banco do spotify onde deseja iniciar a consulta;
     * ```artist``` Id do artista no Spotify;
